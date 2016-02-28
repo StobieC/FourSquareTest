@@ -19,6 +19,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.cameron.foursquaretest.Controller.JsonToList;
 import com.example.cameron.foursquaretest.Model.Constants;
 import com.example.cameron.foursquaretest.adapter.MyAdapter;
 import com.example.cameron.foursquaretest.app.AppController;
@@ -33,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
     EditText search;
     RecyclerView recyclerView;
     Button searchBtn;
+
+    //JsonJobject request required third parameter, which here is null
+    String rBody = null;
 
 
     @Override
@@ -63,14 +67,15 @@ public class MainActivity extends AppCompatActivity {
     {
         Log.e("search for:", searchtxt);
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
-                Constants.URL + searchtxt, null,
+                Constants.URL + searchtxt,rBody,
                 new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.e("TAG RESPONSE", response.toString());
-                        //TODO convert response
-                        MyAdapter rvAdapter = new MyAdapter(/* list */ , MainActivity.this);
+                        JsonToList jsonTOList = new JsonToList(MainActivity.this);
+                        List<HashMap<String , String>> l =jsonTOList.convertjsontolist(response);
+                        MyAdapter rvAdapter = new MyAdapter(l , MainActivity.this);
                         recyclerView.setAdapter(rvAdapter);
 
                     }
@@ -83,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(jsonObjReq);
+        AppController.getInstance().addToRequestQueue(jsonObjReq, "asd");
 
     }
 
