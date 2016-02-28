@@ -23,19 +23,20 @@ import java.util.Map;
  * Created by Cameron on 28/02/2016.
  */
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.TrendViewHolder> {
+public class MyAdapter extends RecyclerView.Adapter<MyAdapter.TrendViewHolder>{
 
     List<Map> trendlist;
 
     Context context;
-    int loaderimg;
     private RequestQueue requestQueue;
 
     public MyAdapter(List dv, Context c)
     {
         trendlist =dv;
         context=c;
-        Log.d("list in adapter", trendlist.toString());
+        Log.d("list in rv adapter", trendlist.toString());
+
+
     }
 
     public class TrendViewHolder extends RecyclerView.ViewHolder {
@@ -91,11 +92,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.TrendViewHolder> {
     public int getItemCount() {
         return trendlist.size();
     }
-
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
     }
+
 
 
 }

@@ -1,16 +1,17 @@
 package com.example.cameron.foursquaretest;
 
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.os.Handler;
+import android.os.Parcel;
+import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -33,14 +34,12 @@ public class MainActivity extends AppCompatActivity {
 
     EditText search;
     RecyclerView recyclerView;
-    Button searchBtn;
-
-    //JsonJobject request required third parameter, which here is null
-    String rBody = null;
-
+    Button buttonSearch;
+    String tag_json_obj = "json_obj_req";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -50,24 +49,32 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
 
+        String address = search.getText().toString();
+
         recyclerView.setLayoutManager(layoutManager);
-        searchBtn = (Button) findViewById(R.id.button);
+        buttonSearch = (Button) findViewById(R.id.button);
 
-
-        searchBtn.setOnClickListener(new View.OnClickListener() {
+        buttonSearch.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                String searchRequest = search.getText().toString();
-                makeRequestJSON(searchRequest);
+            public void onClick(View view) {
+                if (search.getText() != null && search.getText().length() > 0) {
+                    makeRequestJSON(search.getText().toString());
+
+                }
             }
         });
+
     }
 
+    /**
+     * Recieves JSON data from foursquare api
+     * @param searchtxt
+     */
     void makeRequestJSON(String searchtxt)
     {
         Log.e("search for:", searchtxt);
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
-                Constants.URL + searchtxt,rBody,
+                Constants.testurl, (String)null,
                 new Response.Listener<JSONObject>() {
 
                     @Override
@@ -88,29 +95,89 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Adding request to request queue
-        AppController.getInstance().addToRequestQueue(jsonObjReq, "asd");
+        AppController.getInstance().addToRequestQueue(jsonObjReq, tag_json_obj);
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+    //Tried to convert location to Longitude and Latitude for use with finding
+    /*
+    buttonSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (search.getText() != null && search.getText().length() > 0) {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+                    Intent intent = new Intent(MainActivity.this, GeocodeAddressIntentService.class);
+                    intent.putExtra(Constants.RECEIVER, mResultReceiver);
+                    intent.putExtra(Constants.FETCH_TYPE_EXTRA, fetchType);
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+                    if (search.getText().length() == 0) {
+                        Toast.makeText(MainActivity.this, "Please enter an address name", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    intent.putExtra(Constants.LOCATION_NAME_DATA_EXTRA, search.getText().toString());
+                    Log.e("MainActivity", "Starting Service");
+                    startService(intent);
+                }
+
+            }
+        });
         }
 
-        return super.onOptionsItemSelected(item);
-    }
+    /*
+    @SuppressLint("ParcelCreator")
+    class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, final Bundle resultData) {
+            if (resultCode == Constants.SUCCESS_RESULT) {
+                final Address address = resultData.getParcelable(Constants.RESULT_ADDRESS);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        double latitude = address.getLatitude();
+                        double longitude = address.getLongitude();
+
+                        Log.e("MainActivity", "Json");
+                        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
+                                Constants.URL + latitude + "," + longitude, (String)null,
+                                new Response.Listener<JSONObject>() {
+
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        Log.e("TAG RESPONSE", response.toString());
+                                        JsonToList jsonTOList = new JsonToList(MainActivity.this);
+                                        List<HashMap<String , String>> l =jsonTOList.convertjsontolist(response);
+                                        MyAdapter rvAdapter = new MyAdapter(l , MainActivity.this);
+                                        recyclerView.setAdapter(rvAdapter);
+
+                                    }
+                                }, new Response.ErrorListener() {
+
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                VolleyLog.d("TAG", "Error: " + error.getMessage());
+                            }
+                        });
+
+                        // Adding request to request queue
+                        AppController.getInstance().addToRequestQueue(jsonObjReq, tag_json_obj);
+                    }
+                });
+            }
+            else {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                    }
+                });
+            }
+        }
+    }*/
+
+
 }
+

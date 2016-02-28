@@ -57,8 +57,6 @@ public class JsonToList {
             list.add(hashMap);
         }
 
-
-
         SavedList.getInstance().setList(list);
         return list;
     }
